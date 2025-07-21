@@ -166,14 +166,24 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.add(group).setActiveObject(group);
   });
   // 4️⃣ 画像保存
+  // 4️⃣ 画像保存
   document.getElementById("saveBtn").addEventListener("click", () => {
     const dataURL = canvas.toDataURL({
       format: "png",
       quality: 1,
     });
+
+    // 💡 入力テキストを取得
+    const textValue = document.getElementById("textInput").value || "無題";
+    // ファイル名に使用できない文字を削除
+    const safeText = textValue.replace(
+      /[^a-zA-Z0-9_\u3040-\u30ff\u4e00-\u9faf]/g,
+      "_"
+    );
+
     const link = document.createElement("a");
     link.href = dataURL;
-    link.download = "canva風画像.png";
+    link.download = `エボ風_${safeText}.png`; // 💡 動的ファイル名
     link.click();
   });
 });
