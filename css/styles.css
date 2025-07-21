@@ -1,0 +1,15 @@
+body {
+  background: #f0f0f0;
+  text-align: center;
+}
+
+canvas {
+  border: 2px solid #333;
+  margin-top: 10px;
+  background: transparent;
+}
+
+input,
+button {
+  margin: 5px;
+}

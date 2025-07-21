@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>文字位置・サイズ指定エディタ</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+  </head>
+  <body>
+    <h1>文字位置・サイズ指定エディタ</h1>
+
+    <label
+      >テキスト:
+      <input type="text" id="textInput" value="ファインモーション" /></label
+    ><br />
+    <label
+      >テキスト幅<input
+        type="number"
+        id="widthInput"
+        value="400"
+        placeholder="固定幅 (px)"
+    /></label>
+    <label>X座標: <input type="number" id="xInput" value="590" /></label>
+    <label>Y座標: <input type="number" id="yInput" value="500" /></label>
+    <label
+      >フォントサイズ: <input type="number" id="sizeInput" value="120"
+    /></label>
+    <button id="addTextBtn">テキストを追加</button>
+    <!-- ユーザーが透過画像を追加 -->
+    <input type="file" id="imageUpload" accept="image/*" />
+    <label
+      >X座標:<input
+        type="number"
+        id="imgX"
+        value="250"
+        placeholder="X座標 (px)"
+    /></label>
+    <label
+      >Y座標:<input
+        type="number"
+        id="imgY"
+        value="200"
+        placeholder="Y座標 (px)"
+    /></label>
+    <label
+      >サイズ:<input
+        type="number"
+        id="imgSize"
+        value="300"
+        placeholder="サイズ (px)"
+    /></label>
+    <button id="insertImageBtn">透過画像を追加</button>
+    <button id="applyBtn">適用</button>
+    <button id="saveBtn">画像保存</button><br />
+
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    <script src="js/scripts.js"></script>
+  </body>
+</html>
