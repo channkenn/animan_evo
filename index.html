@@ -29,9 +29,8 @@
     <label
       >フォントサイズ: <input type="number" id="sizeInput" value="100"
     /></label>
-    <button id="addTextBtn">テキストを追加</button>
-    <!-- ユーザーが透過画像を追加 -->
-    <input type="file" id="imageUpload" accept="image/*" />
+    <button id="addTextBtn">テキストを追加</button><br />
+
     <label
       >X座標:<input
         type="number"
@@ -53,8 +52,11 @@
         value="300"
         placeholder="サイズ (px)"
     /></label>
+    <!-- ユーザーが透過画像を追加 -->
+    <input type="file" id="imageUpload" accept="image/*" />
     <button id="insertImageBtn">透過画像を追加</button>
     <button id="saveBtn">画像保存</button><br />
+    <button id="clearBtn">透過画像とテキストをクリア</button>
 
     <canvas id="canvas" width="800" height="600"></canvas>
 

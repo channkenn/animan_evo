@@ -38,56 +38,67 @@ document.addEventListener("DOMContentLoaded", () => {
       transparentCorners: false,
       cornerColor: "blue",
       borderColor: "blue",
+      selectable: false,
+      evented: false, // これを追加！
     });
     evolutionImage = img; // 後で参照
     canvas.add(img).bringToFront();
   });
 
-  // 3️⃣ ユーザーが透過画像を追加
-  document.getElementById("insertImageBtn").addEventListener("click", () => {
-    const fileInput = document.getElementById("imageUpload");
-    const file = fileInput.files[0];
-
-    if (file) {
-      const xValue = parseInt(document.getElementById("imgX").value, 10);
-      const safeX = isNaN(xValue) ? canvas.width / 2 : xValue;
-
-      const yValue = parseInt(document.getElementById("imgY").value, 10);
-      const safeY = isNaN(yValue) ? canvas.height / 2 : yValue;
-
-      const sizeValue = parseInt(document.getElementById("imgSize").value, 10);
-      const safeSize = isNaN(sizeValue) ? 200 : sizeValue;
-
-      const reader = new FileReader();
-      reader.onload = function () {
-        fabric.Image.fromURL(reader.result, (img) => {
-          // サイズ調整
-          const scale = safeSize / Math.max(img.width, img.height);
-          img.scale(scale);
-
-          img.set({
-            left: safeX,
-            top: safeY,
-            transparentCorners: false,
-            cornerColor: "orange", // ユーザー追加画像はオレンジ
-            borderColor: "orange",
-            selectable: true, // ✅ ドラッグ・回転・リサイズ可
-          });
-
-          // evolution の下に挿入
-          canvas.add(img);
-          const evoIndex = canvas.getObjects().indexOf(evolutionImage);
-          canvas.moveTo(img, evoIndex);
-
-          canvas.setActiveObject(img); // 追加直後に選択状態
-          canvas.renderAll();
-        });
-      };
-      reader.readAsDataURL(file);
-    } else {
-      alert("画像ファイルを選択してください");
+  // ファイルが選択されたとき：読み込み＋canvasに即追加
+  document.getElementById("imageUpload").addEventListener("change", (event) => {
+    uploadedFile = event.target.files[0] || null;
+    if (uploadedFile) {
+      addImageToCanvas(uploadedFile);
     }
   });
+
+  // 「透過画像を追加」ボタンで再度追加
+  document.getElementById("insertImageBtn").addEventListener("click", () => {
+    if (!uploadedFile) {
+      alert("画像ファイルを先に選択してください");
+      return;
+    }
+    addImageToCanvas(uploadedFile);
+  });
+  // canvasへ画像を追加する共通関数
+  function addImageToCanvas(file) {
+    const xValue = parseInt(document.getElementById("imgX").value, 10);
+    const safeX = isNaN(xValue) ? canvas.width / 2 : xValue;
+
+    const yValue = parseInt(document.getElementById("imgY").value, 10);
+    const safeY = isNaN(yValue) ? canvas.height / 2 : yValue;
+
+    const sizeValue = parseInt(document.getElementById("imgSize").value, 10);
+    const safeSize = isNaN(sizeValue) ? 200 : sizeValue;
+
+    const reader = new FileReader();
+    reader.onload = function () {
+      fabric.Image.fromURL(reader.result, (img) => {
+        const scale = safeSize / Math.max(img.width, img.height);
+        img.scale(scale);
+        img.set({
+          left: safeX,
+          top: safeY,
+          transparentCorners: false,
+          cornerColor: "orange",
+          borderColor: "orange",
+          selectable: true,
+        });
+
+        canvas.add(img);
+
+        const evoIndex = canvas.getObjects().indexOf(evolutionImage);
+        const insertIndex = Math.max(evoIndex - 1, 0);
+        canvas.moveTo(img, insertIndex);
+
+        canvas.setActiveObject(img);
+        canvas.renderAll();
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
   // テキスト追加
   document.getElementById("addTextBtn").addEventListener("click", () => {
     const textValue = document.getElementById("textInput").value || "テキスト";
@@ -185,5 +196,32 @@ document.addEventListener("DOMContentLoaded", () => {
     link.href = dataURL;
     link.download = `エボ風_${safeText}.png`; // 💡 動的ファイル名
     link.click();
+  });
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    // canvas上のオブジェクトを全部取得
+    const objects = canvas.getObjects();
+
+    // 削除対象を絞る条件：evolutionImage以外、かつ画像かテキストグループなら消す
+    // 背景画像やevolutionImageは残すためのフィルター
+    objects.forEach((obj) => {
+      // evolutionImageは残す
+      if (obj === evolutionImage) return;
+
+      // 背景画像はcanvas.backgroundImageに格納されているのでobjにはないはず
+      // 透過画像はfabric.Image、テキストはfabric.Group（テキストグループ）
+      // fabric.Groupでテキストグループを判別
+
+      if (
+        obj.type === "image" || // 透過画像
+        obj.type === "group" // テキストグループ
+      ) {
+        canvas.remove(obj);
+      }
+    });
+
+    canvas.discardActiveObject();
+    canvas.renderAll();
+    // ファイル選択もクリアする
+    document.getElementById("imageUpload").value = "";
   });
 });
