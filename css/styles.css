@@ -286,3 +286,91 @@ canvas {
   cursor: pointer;
   border-radius: 50%;
 }
+
+/* ---ここから追加--- */
+
+/* レスポンシブデザインのブレークポイント (例: 768px 以下の場合に適用) */
+@media (max-width: 768px) {
+  /* Bodyのパディングを調整 (スマホで左右の余白を減らす) */
+  body {
+    padding: 10px;
+  }
+
+  /* トップコントロール（テキスト/画像追加部分）の調整 */
+  .top-controls {
+    flex-direction: column; /* 縦並びにする */
+    gap: 20px; /* 縦方向のギャップを調整 */
+    padding: 15px;
+    max-width: 100%; /* 全幅を使う */
+    box-sizing: border-box; /* パディングとボーダーを幅に含める */
+  }
+
+  .top-control-section {
+    min-width: unset; /* 最小幅の制約を解除 */
+    width: 100%; /* 親の幅いっぱいに広げる */
+  }
+
+  /* メインコンテナ（左右カラムとCanvas）の調整 */
+  .container {
+    flex-direction: column; /* 縦並びにする */
+    gap: 20px; /* 縦方向のギャップを設定 */
+    padding: 15px;
+    max-width: 100%; /* 全幅を使う */
+    overflow-x: hidden; /* 横スクロールバーを非表示にする（縦並びになったため不要） */
+    box-sizing: border-box; /* パディングとボーダーを幅に含める */
+  }
+
+  /* 左カラム: Controls */
+  .controls {
+    border-right: none; /* 縦並びになったので右側のボーダーを削除 */
+    border-bottom: 1px solid #eee; /* 下にボーダーを追加 */
+    padding-right: 0;
+    padding-bottom: 20px;
+    flex: 0 0 auto; /* 固定幅を解除し、コンテンツに合わせて調整 */
+    width: 100%; /* 親の幅いっぱいに広げる */
+    min-width: unset; /* 最小幅の制約を解除 */
+    box-sizing: border-box; /* パディングとボーダーを幅に含める */
+  }
+
+  /* 中央カラム: Canvas Container */
+  .canvas-container {
+    width: 100%;
+    /* height: auto;  高さの自動調整を解除 */
+    min-height: 250px; /* ★ここを修正/追加: スマホでの最小高さを設定 (例: 250px) */
+    max-height: 80vw; /* ★ここを修正/追加: 画面幅に対する最大高さを設定 (例: 画面幅の80%) */
+    margin: 0;
+    max-width: 100%;
+    /* max-height: 50vw;  これは以前の提案、より柔軟な設定に変更 */
+    min-width: unset;
+    box-sizing: border-box;
+    /* Canvasの縦横比を維持しながら、ある程度の高さを確保したい場合は
+       padding-bottomを使ったAspectRatio Boxの手法も有効ですが、
+       今回はmin-heightとmax-heightで対応します。 */
+  }
+
+  /* Canvas要素自体も親コンテナに合わせてサイズ調整 */
+  canvas {
+    width: 100% !important;
+    height: 100% !important; /* ★ここを修正: 親コンテナの高さに合わせる */
+    display: block;
+    object-fit: contain; /* ★ここを修正/追加: コンテナ内でCanvas内容を収める */
+  }
+
+  /* 右カラム: Object List */
+  #object-list {
+    border-left: none; /* 縦並びになったので左側のボーダーを削除 */
+    padding-left: 0;
+    padding-top: 20px;
+    flex: 0 0 auto; /* 固定幅を解除し、コンテンツに合わせて調整 */
+    width: 100%; /* 親の幅いっぱいに広げる */
+    min-width: unset; /* 最小幅の制約を解除 */
+    box-sizing: border-box; /* パディングとボーダーを幅に含める */
+  }
+
+  /* オブジェクトリストアイテムのテキスト幅調整 (より柔軟に) */
+  #object-ul li span {
+    max-width: 60%; /* 親の幅に対して60%まで広がるように調整。必要に応じて変更 */
+  }
+}
+
+/* ---ここまで追加--- */
