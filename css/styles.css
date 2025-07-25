@@ -1,15 +1,288 @@
+/* General Body Styles */
 body {
-  background: #f0f0f0;
-  text-align: center;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 20px;
+  background-color: #f4f4f4;
+}
+
+h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Main Container for Layout */
+.container {
+  display: flex;
+  width: 100%;
+  /* Canvas (900px) + Controls (280px) + Object List (250px) + 2 * gap (2*20px) = 1470px */
+  max-width: 1340px; /* ここを1340pxに修正 */
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  justify-content: center; /* コンテンツを中央揃えにする */
+  align-items: flex-start; /* 各カラムの開始位置を上揃えにする */
+}
+
+/* Left Column: Controls */
+.controls {
+  flex: 0 0 180px; /* 固定幅 */
+  padding-right: 20px;
+  border-right: 1px solid #eee;
+}
+
+.controls h2 {
+  color: #555;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-top: 20px;
+  margin-bottom: 15px;
+}
+
+.controls h2:first-of-type {
+  margin-top: 0; /* 最初のh2の上マージンをなくす */
+}
+
+.controls label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #666;
+}
+
+.controls input[type="text"],
+.controls input[type="number"],
+.controls input[type="file"] {
+  width: calc(100% - 10px); /* Padding分を考慮 */
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.controls button {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  margin-top: 10px;
+  transition: background-color 0.2s;
+}
+
+.controls button:hover {
+  background-color: #218838;
+}
+
+#selectedObjectControls label {
+  margin-bottom: 5px; /* 選択中コントロールのラベル間隔を狭める */
+}
+
+#selectedObjectControls input[type="number"],
+#selectedObjectControls input[type="text"] {
+  width: 100px; /* 個別調整 */
+  margin-left: 5px;
+}
+
+#selectedObjectControls button {
+  margin-right: 5px;
+  background-color: #007bff;
+}
+
+#selectedObjectControls button:hover {
+  background-color: #0056b3;
+}
+
+#noObjectSelectedText {
+  color: #888;
+  font-style: italic;
+  margin-top: 15px;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #eee;
+  margin: 20px 0;
+}
+
+/* Center Column: Canvas */
+.canvas-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin: 0 20px; /* 左右にギャップを設定 */
+  /* Canvasのサイズを固定するため、このコンテナはCanvasのサイズに合わせる */
+  width: 900px; /* Canvasの幅に合わせる */
+  height: 600px; /* Canvasの高さに合わせる */
+  flex-shrink: 0; /* コンテナが縮まないように */
 }
 
 canvas {
-  border: 2px solid #333;
-  margin-top: 10px;
-  background: transparent;
+  border: 1px solid #ccc; /* Canvas自体のボーダー */
+  display: block; /* 不要な余白を削除 */
+  /* ここから下のwidth, height, min/max-width/heightを削除します */
+  /* width: 900px; */
+  /* height: 600px; */
+  /* min-width: 900px; */
+  /* min-height: 600px; */
+  /* max-width: 900px; */
+  /* max-height: 600px; */
 }
 
-input,
-button {
-  margin: 5px;
+/* Right Column: Object List */
+#object-list {
+  flex: 0 0 200px; /* 固定幅 */
+  padding-left: 20px;
+  border-left: 1px solid #eee;
+}
+
+#object-list h3 {
+  color: #555;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+#object-ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#object-ul li {
+  display: flex; /* Flexboxを有効に */
+  align-items: center; /* 垂直方向中央揃え */
+  justify-content: space-between; /* テキストとボタンを左右に配置 */
+  padding: 8px 10px;
+  border: 1px solid #eee;
+  margin-bottom: 5px;
+  background-color: #f9f9f9;
+  cursor: grab; /* ドラッグ可能であることを示す */
+  border-radius: 4px;
+  font-size: 0.9em;
+  position: relative;
+  user-select: none;
+  /* レイアウト崩れ防止のための追加 */
+  overflow: hidden; /* はみ出たコンテンツを隠す */
+  box-sizing: border-box; /* paddingとborderをwidth/heightに含める */
+}
+
+#object-ul li.selected {
+  background-color: #e0f2f7;
+  border-color: #007bff;
+  font-weight: bold;
+}
+
+#object-ul li.dragging {
+  opacity: 0.7;
+  border: 2px dashed #007bff;
+  background-color: #e6f7ff;
+}
+
+/* テキスト部分のスタイルを修正・追加 */
+#object-ul li span {
+  /* flex-grow: 1; */ /* 最大限に占有する設定を解除 */
+  flex-shrink: 1; /* 必要に応じて縮小する */
+  flex-basis: auto; /* 基本サイズをコンテンツに合わせる */
+  /* min-width: 0; */ /* flex-basis: auto; と併用するとデフォルトで適用されるため不要 */
+  white-space: nowrap; /* テキストを折り返さない */
+  overflow: hidden; /* はみ出た部分を隠す */
+  text-overflow: ellipsis; /* はみ出た部分を三点リーダーで表示 */
+  padding-right: 5px; /* テキストとボタンの間に少し隙間を作る */
+
+  /* ***** ここを修正/追加 ***** */
+  /* 全角2文字分の幅の目安（font-size: 0.9em; を考慮） */
+  /* 例: 0.9em = 0.9 * 16px = 14.4px/文字 */
+  /* 全角2文字なので、14.4px * 2 = 28.8px くらいが目安 */
+  /* ただし、三点リーダー分も必要なので、もう少し大きくする */
+  max-width: 80px; /* 全角2文字＋αの幅を設定。環境によって微調整が必要な場合があります。 */
+  /* ************************* */
+}
+
+/* ボタンコンテナのスタイル */
+#object-ul li .item-buttons {
+  display: flex;
+  gap: 5px; /* ボタン間のスペース */
+  flex-shrink: 0; /* コンテンツが縮まないように */
+}
+
+#object-ul li .move-btn,
+#object-ul li .delete-item-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.8em;
+  transition: background-color 0.2s;
+}
+
+#object-ul li .delete-item-btn {
+  background-color: #dc3545;
+}
+
+#object-ul li .move-btn:hover {
+  background-color: #0056b3;
+}
+
+#object-ul li .delete-item-btn:hover {
+  background-color: #c82333;
+}
+
+/* 矢印ボタンの見た目 */
+#object-ul li .move-up-btn::before {
+  content: "↑"; /* 上矢印 */
+}
+
+#object-ul li .move-down-btn::before {
+  content: "↓"; /* 下矢印 */
+}
+
+/* スライダーのスタイル */
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
+  border-radius: 4px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #007bff;
+  cursor: pointer;
+  border-radius: 50%;
 }
