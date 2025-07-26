@@ -316,12 +316,14 @@ canvas {
 
   .controls {
     border-bottom: 1px solid #eee; /* 下にボーダーを追加 */
+    order: 1; /* コントロールパネルを一番最初に表示 */
   }
 
   #object-list {
     padding-top: 20px;
     border-top: 1px solid #eee; /* 上にボーダーを追加 */
     color: #333; /* ★追加: レスポンシブ時も文字色を濃いグレーに */
+    order: 2; /* オブジェクトリストをCanvasより前に表示 */
   }
 
   /* Canvas Container の調整 */
@@ -333,6 +335,7 @@ canvas {
     position: relative;
     overflow: hidden;
     flex: 1 1 auto; /* 伸縮・拡大を許可 */
+    order: 3; /* Canvasを一番最後に表示 */
   }
 
   /* Canvas要素自体も親コンテナに合わせてサイズ調整 */
