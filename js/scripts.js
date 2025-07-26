@@ -176,6 +176,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     userObjects.reverse();
 
+    // Canvas上で現在選択されているオブジェクトを取得
+    const activeCanvasObject = canvas.getActiveObject();
+
     userObjects.forEach((obj, index) => {
       if (!obj.canvasId) {
         obj.canvasId = `obj_${nextObjectId++}`;
@@ -205,7 +208,12 @@ document.addEventListener("DOMContentLoaded", () => {
       li.appendChild(textSpan);
 
       li.dataset.objectId = obj.canvasId;
-      li.classList.toggle("selected", obj.active);
+      // ★ ここでアクティブ状態をチェックし、'selected' クラスを適用
+      if (activeCanvasObject && activeCanvasObject.canvasId === obj.canvasId) {
+        li.classList.add("selected");
+      } else {
+        li.classList.remove("selected");
+      }
       li.draggable = true;
 
       const buttonContainer = document.createElement("div");
@@ -266,10 +274,10 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
           canvas.remove(objToDelete);
         }
-        canvas.discardActiveObject();
-        canvas.renderAll();
-        updateObjectList();
-        loadObjectProperties(null);
+        // canvas.discardActiveObject(); // 削除後にこれは不要、selection:clearedで処理される
+        // canvas.renderAll(); // object:removed イベントで自動的にrenderAllされる
+        // updateObjectList(); // object:removed イベントで自動的に更新される
+        // loadObjectProperties(null); // object:removed イベントで自動的に更新される
       });
       buttonContainer.appendChild(deleteButton);
       li.appendChild(buttonContainer);
@@ -354,17 +362,33 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      li.addEventListener("click", () => {
-        canvas.discardActiveObject();
+      // ★ オブジェクトリストアイテムをクリックした時の処理を修正
+      li.addEventListener("click", (e) => {
+        // ボタンクリック時はCanvasオブジェクトを選択しない
+        if (
+          e.target.classList.contains("move-btn") ||
+          e.target.classList.contains("delete-item-btn")
+        ) {
+          return;
+        }
+
         const targetObj = canvas
           .getObjects()
           .find((o) => o.canvasId === li.dataset.objectId);
+
         if (targetObj) {
+          // Canvas上でアクティブにする
           canvas.setActiveObject(targetObj);
+        } else {
+          // オブジェクトが見つからない場合や、クリックで選択を解除したい場合
+          canvas.discardActiveObject();
         }
-        canvas.renderAll();
-        updateObjectList();
-        loadObjectProperties(targetObj);
+        canvas.renderAll(); // Canvasを再描画
+
+        // updateObjectList()とloadObjectProperties()はFabric.jsのselectionイベントで処理されるため、ここでの直接呼び出しは不要
+        // 強制的にリストの選択状態を更新したい場合はここで呼び出す
+        // updateObjectList();
+        // loadObjectProperties(targetObj);
       });
 
       objectUl.appendChild(li);
@@ -378,27 +402,27 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target && !e.target.canvasId) {
       e.target.canvasId = `obj_${nextObjectId++}`;
     }
-    updateObjectList();
+    updateObjectList(); // ★ オブジェクト追加時にもリストを更新
     loadObjectProperties(e.target);
   });
 
   canvas.on("object:removed", () => {
-    updateObjectList();
+    updateObjectList(); // ★ オブジェクト削除時にもリストを更新
     loadObjectProperties(canvas.getActiveObject());
   });
 
   canvas.on("selection:created", (e) => {
-    updateObjectList();
+    updateObjectList(); // ★ 選択作成時にリストを更新
     loadObjectProperties(e.selected[0]);
   });
 
   canvas.on("selection:updated", (e) => {
-    updateObjectList();
+    updateObjectList(); // ★ 選択更新時にリストを更新
     loadObjectProperties(e.selected[0]);
   });
 
   canvas.on("selection:cleared", () => {
-    updateObjectList();
+    updateObjectList(); // ★ 選択解除時にリストを更新
     loadObjectProperties(null);
   });
 
@@ -494,8 +518,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         canvas.setActiveObject(img);
         canvas.renderAll();
-        updateObjectList();
-        loadObjectProperties(img);
+        // updateObjectList(); // selection:created で処理されるため不要
+        // loadObjectProperties(img); // selection:created で処理されるため不要
       });
     };
     reader.readAsDataURL(file);
@@ -568,8 +592,8 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.setActiveObject(group);
     canvas.renderAll();
 
-    updateObjectList();
-    loadObjectProperties(group);
+    // updateObjectList(); // selection:created で処理されるため不要
+    // loadObjectProperties(group); // selection:created で処理されるため不要
   });
 
   saveBtn.addEventListener("click", () => {
@@ -612,12 +636,12 @@ document.addEventListener("DOMContentLoaded", () => {
       canvas.remove(obj);
     });
 
-    canvas.discardActiveObject();
-    canvas.renderAll();
+    // canvas.discardActiveObject(); // object:removed イベントで処理される
+    // canvas.renderAll(); // object:removed イベントで処理される
     imageUpload.value = "";
     uploadedFile = null;
-    updateObjectList();
-    loadObjectProperties(null);
+    // updateObjectList(); // object:removed イベントで処理される
+    // loadObjectProperties(null); // object:removed イベントで処理される
   });
 
   updateObjectList();
