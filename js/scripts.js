@@ -435,24 +435,60 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ★ここから修正★
-  // Canvasのサイズを更新し、背景とevolutionImageを再調整する関数
+  // ★修正箇所 1: resizeCanvas 関数
   function resizeCanvas() {
     const canvasContainer = document.querySelector(".canvas-container");
-    const newWidth = canvasContainer.offsetWidth;
-    const newHeight = canvasContainer.offsetHeight;
+
+    // 現在のウィンドウの幅を取得
+    const windowWidth = window.innerWidth;
+
+    let newWidth;
+    let newHeight;
+
+    // 画面幅が1024px以下の場合 (スマホ/タブレット)
+    if (windowWidth <= 1024) {
+      // Canvasの表示サイズを固定したい場合
+      // ここで固定したい幅と高さを指定します
+      // 例: PCと同じ初期サイズで固定 (もしはみ出してもスクロールで対応)
+      newWidth = 900;
+      newHeight = 600;
+
+      // もし、画面幅に合わせてCanvasの幅は伸縮させたいが、高さは固定したい場合
+      // newWidth = canvasContainer.offsetWidth; // 親要素の幅に合わせる
+      // newHeight = 600; // 高さは600pxで固定
+      // もしくは、さらに小さいスマホ向けに別の固定値を設定することも可能
+      // if (windowWidth <= 576) {
+      //   newHeight = 400; // 例: 576px以下なら高さを400pxに固定
+      // }
+    } else {
+      // PC画面の場合 (1025px以上) は、現在のレスポンシブな動作を維持
+      newWidth = canvasContainer.offsetWidth;
+      // 高さの計算を修正: 元のCanvasの縦横比を維持するようにする
+      // デスクトップのCanvas縦横比 (600 / 900) = 0.6666...
+      newHeight = newWidth * (600 / 900);
+    }
 
     canvas.setDimensions({ width: newWidth, height: newHeight });
 
     // 背景画像の調整
     if (canvas.backgroundImage) {
-      const bgImg = canvas.backgroundImage;
-      fitImageToCanvas(bgImg); // 新しいCanvasサイズに合わせて調整
-      bgImg.setCoords();
+      // 背景画像を新しいCanvasサイズにフィットさせる
+      canvas.backgroundImage.set({
+        scaleX: newWidth / canvas.backgroundImage.width,
+        scaleY: newHeight / canvas.backgroundImage.height,
+        originX: "left",
+        originY: "top",
+        left: 0,
+        top: 0,
+      });
+      canvas.backgroundImage.setCoords();
     }
 
     // evolutionImageの調整
     if (evolutionImage) {
-      fitImageToCanvas(evolutionImage); // 新しいCanvasサイズに合わせて調整
+      // evolutionImageも新しいCanvasサイズにフィットさせる
+      // fitImageToCanvas関数を再利用
+      fitImageToCanvas(evolutionImage);
       evolutionImage.setCoords();
     }
 

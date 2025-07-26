@@ -328,23 +328,19 @@ canvas {
 
   /* Canvas Container の調整 */
   .canvas-container {
-    width: 100%; /* 親の幅いっぱいに */
-    height: auto; /* 高さを自動調整 */
-    margin: 0;
-    padding-bottom: 66.66%; /* Canvasの縦横比 600/900 = 0.6666... */
-    position: relative;
-    overflow: hidden;
-    flex: 1 1 auto; /* 伸縮・拡大を許可 */
-    order: 3; /* Canvasを一番最後に表示 */
+    width: 900px; /* JSで設定するCanvasの幅と合わせるか、親要素の幅 */
+    height: 600px; /* JSで設定するCanvasの高さと合わせる */
+    padding-bottom: 0; /* JSで高さを固定するため、縦横比維持のパディングは不要 */
+    margin: 0 auto; /* 中央揃え */
+    flex: none; /* Flexboxの伸縮を無効化 */
+    order: 2;
   }
 
   /* Canvas要素自体も親コンテナに合わせてサイズ調整 */
   canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100% !important;
-    height: 100% !important;
+    position: static; /* absoluteを解除 */
+    width: 100% !important; /* 親要素の幅に合わせる */
+    height: 100% !important; /* 親要素の高さに合わせる */
   }
 
   /* 入力フィールドやボタンの幅調整 */
@@ -404,5 +400,14 @@ canvas {
   }
   #object-ul li span {
     max-width: 80px; /* 小型スマホで調整。デフォルト値と同じか少し狭く */
+  }
+  /* Canvas Container の調整 */
+  .canvas-container {
+    /* 必要に応じて、さらに小さい画面での固定サイズを設定 */
+    width: 100%; /* 例えば画面幅いっぱいに */
+    max-width: 900px; /* ただし最大900px */
+    height: 400px; /* スマホで表示したい固定高さ */
+    margin: 0 auto;
+    padding-bottom: 0;
   }
 }
