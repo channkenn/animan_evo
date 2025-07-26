@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const canvas = new fabric.Canvas("canvas", {
-    width: 900,
-    height: 600,
+    width: 900, // 初期サイズ（デスクトップ向け）
+    height: 600, // 初期サイズ（デスクトップ向け）
     preserveObjectStacking: true,
   });
 
@@ -176,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     userObjects.reverse();
 
-    // Canvas上で現在選択されているオブジェクトを取得
     const activeCanvasObject = canvas.getActiveObject();
 
     userObjects.forEach((obj, index) => {
@@ -208,7 +207,6 @@ document.addEventListener("DOMContentLoaded", () => {
       li.appendChild(textSpan);
 
       li.dataset.objectId = obj.canvasId;
-      // ★ ここでアクティブ状態をチェックし、'selected' クラスを適用
       if (activeCanvasObject && activeCanvasObject.canvasId === obj.canvasId) {
         li.classList.add("selected");
       } else {
@@ -274,10 +272,6 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
           canvas.remove(objToDelete);
         }
-        // canvas.discardActiveObject(); // 削除後にこれは不要、selection:clearedで処理される
-        // canvas.renderAll(); // object:removed イベントで自動的にrenderAllされる
-        // updateObjectList(); // object:removed イベントで自動的に更新される
-        // loadObjectProperties(null); // object:removed イベントで自動的に更新される
       });
       buttonContainer.appendChild(deleteButton);
       li.appendChild(buttonContainer);
@@ -362,9 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
-      // ★ オブジェクトリストアイテムをクリックした時の処理を修正
       li.addEventListener("click", (e) => {
-        // ボタンクリック時はCanvasオブジェクトを選択しない
         if (
           e.target.classList.contains("move-btn") ||
           e.target.classList.contains("delete-item-btn")
@@ -377,18 +369,11 @@ document.addEventListener("DOMContentLoaded", () => {
           .find((o) => o.canvasId === li.dataset.objectId);
 
         if (targetObj) {
-          // Canvas上でアクティブにする
           canvas.setActiveObject(targetObj);
         } else {
-          // オブジェクトが見つからない場合や、クリックで選択を解除したい場合
           canvas.discardActiveObject();
         }
-        canvas.renderAll(); // Canvasを再描画
-
-        // updateObjectList()とloadObjectProperties()はFabric.jsのselectionイベントで処理されるため、ここでの直接呼び出しは不要
-        // 強制的にリストの選択状態を更新したい場合はここで呼び出す
-        // updateObjectList();
-        // loadObjectProperties(targetObj);
+        canvas.renderAll();
       });
 
       objectUl.appendChild(li);
@@ -402,27 +387,27 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.target && !e.target.canvasId) {
       e.target.canvasId = `obj_${nextObjectId++}`;
     }
-    updateObjectList(); // ★ オブジェクト追加時にもリストを更新
+    updateObjectList();
     loadObjectProperties(e.target);
   });
 
   canvas.on("object:removed", () => {
-    updateObjectList(); // ★ オブジェクト削除時にもリストを更新
+    updateObjectList();
     loadObjectProperties(canvas.getActiveObject());
   });
 
   canvas.on("selection:created", (e) => {
-    updateObjectList(); // ★ 選択作成時にリストを更新
+    updateObjectList();
     loadObjectProperties(e.selected[0]);
   });
 
   canvas.on("selection:updated", (e) => {
-    updateObjectList(); // ★ 選択更新時にリストを更新
+    updateObjectList();
     loadObjectProperties(e.selected[0]);
   });
 
   canvas.on("selection:cleared", () => {
-    updateObjectList(); // ★ 選択解除時にリストを更新
+    updateObjectList();
     loadObjectProperties(null);
   });
 
@@ -430,18 +415,15 @@ document.addEventListener("DOMContentLoaded", () => {
     loadObjectProperties(e.target);
   });
 
-  // fitImageToCanvas 関数を修正
+  // fitImageToCanvas 関数を修正 (変更なし)
   function fitImageToCanvas(img) {
     const canvasRatio = canvas.width / canvas.height;
     const imgRatio = img.width / img.height;
     let scale;
 
-    // 画像がCanvasに収まるようにスケールを計算（containの挙動）
     if (imgRatio > canvasRatio) {
-      // 画像の幅がCanvasより相対的に大きい場合、幅に合わせてスケール
       scale = canvas.width / img.width;
     } else {
-      // 画像の高さがCanvasより相対的に大きい場合、高さに合わせてスケール
       scale = canvas.height / img.height;
     }
 
@@ -452,17 +434,54 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ここから下の画像読み込みは変更なし
+  // ★ここから修正★
+  // Canvasのサイズを更新し、背景とevolutionImageを再調整する関数
+  function resizeCanvas() {
+    const canvasContainer = document.querySelector(".canvas-container");
+    const newWidth = canvasContainer.offsetWidth;
+    const newHeight = canvasContainer.offsetHeight;
+
+    canvas.setDimensions({ width: newWidth, height: newHeight });
+
+    // 背景画像の調整
+    if (canvas.backgroundImage) {
+      const bgImg = canvas.backgroundImage;
+      fitImageToCanvas(bgImg); // 新しいCanvasサイズに合わせて調整
+      bgImg.setCoords();
+    }
+
+    // evolutionImageの調整
+    if (evolutionImage) {
+      fitImageToCanvas(evolutionImage); // 新しいCanvasサイズに合わせて調整
+      evolutionImage.setCoords();
+    }
+
+    canvas.renderAll();
+  }
+
+  // 画像の読み込みとCanvasへの追加
+  let loadedImagesCount = 0; // 読み込み完了した画像の数
+  const totalImagesToLoad = 2; // back.png と evolution.png
+
   fabric.Image.fromURL("img/back.png", (img) => {
-    fitImageToCanvas(img); // 修正されたfitImageToCanvasが適用されます
     img.selectable = false;
     img.evented = false;
-    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-    updateObjectList();
+    canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+      scaleX: canvas.width / img.width, // Canvasの初期幅に合わせてスケール
+      scaleY: canvas.height / img.height, // Canvasの初期高さに合わせてスケール
+      originX: "left",
+      originY: "top",
+      left: 0,
+      top: 0,
+    });
+    // ★画像読み込み完了後にカウント
+    loadedImagesCount++;
+    if (loadedImagesCount === totalImagesToLoad) {
+      resizeCanvas(); // 全ての初期画像読み込み後に一度リサイズ
+    }
   });
 
   fabric.Image.fromURL("img/evolution.png", (img) => {
-    fitImageToCanvas(img); // こちらも同様
     img.set({
       transparentCorners: false,
       cornerColor: "blue",
@@ -470,11 +489,20 @@ document.addEventListener("DOMContentLoaded", () => {
       selectable: false,
       evented: false,
     });
-    evolutionImage = img;
-    canvas.add(img).bringToFront();
-    updateObjectList();
+    evolutionImage = img; // グローバル変数に格納
+    canvas.add(img).bringToFront(); // Canvasに追加
+
+    // ★画像読み込み完了後にカウント
+    loadedImagesCount++;
+    if (loadedImagesCount === totalImagesToLoad) {
+      resizeCanvas(); // 全ての初期画像読み込み後に一度リサイズ
+    }
   });
 
+  // ウィンドウのリサイズイベントをリッスン
+  window.addEventListener("resize", resizeCanvas);
+
+  // ここから下のイベントリスナーや関数はそのまま
   imageUpload.addEventListener("change", (event) => {
     uploadedFile = event.target.files[0] || null;
     if (uploadedFile) {
@@ -518,8 +546,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         canvas.setActiveObject(img);
         canvas.renderAll();
-        // updateObjectList(); // selection:created で処理されるため不要
-        // loadObjectProperties(img); // selection:created で処理されるため不要
       });
     };
     reader.readAsDataURL(file);
@@ -591,9 +617,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     canvas.setActiveObject(group);
     canvas.renderAll();
-
-    // updateObjectList(); // selection:created で処理されるため不要
-    // loadObjectProperties(group); // selection:created で処理されるため不要
   });
 
   saveBtn.addEventListener("click", () => {
@@ -636,14 +659,11 @@ document.addEventListener("DOMContentLoaded", () => {
       canvas.remove(obj);
     });
 
-    // canvas.discardActiveObject(); // object:removed イベントで処理される
-    // canvas.renderAll(); // object:removed イベントで処理される
     imageUpload.value = "";
     uploadedFile = null;
-    // updateObjectList(); // object:removed イベントで処理される
-    // loadObjectProperties(null); // object:removed イベントで処理される
   });
 
+  // 初期ロード時のリストとプロパティの更新
   updateObjectList();
   loadObjectProperties(null);
 });

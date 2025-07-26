@@ -1,3 +1,10 @@
+/* 必ず最初に記述することをお勧めします */
+*,
+*::before,
+*::after {
+  box-sizing: border-box; /* 全ての要素にbox-sizingを適用 */
+}
+
 /* General Body Styles */
 body {
   font-family: Arial, sans-serif;
@@ -5,34 +12,38 @@ body {
   flex-direction: column;
   align-items: center;
   margin: 0;
-  padding: 20px;
-  background-color: #f4f4f4;
+  padding: 10px;
+  background-color: #104cd0;
+  color: white; /* bodyのデフォルト文字色は白 */
+  min-height: 100vh;
 }
 
 h1 {
-  color: #333;
+  color: white;
   margin-bottom: 20px;
+  text-align: center;
 }
 
 /* Main Container for Layout */
 .container {
   display: flex;
   width: 100%;
-  /* Canvas (900px) + Controls (280px) + Object List (250px) + 2 * gap (2*20px) = 1470px */
-  max-width: 1340px; /* ここを1340pxに修正 */
+  max-width: 1430px; /* PCでの最大幅 */
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  justify-content: center; /* コンテンツを中央揃えにする */
-  align-items: flex-start; /* 各カラムの開始位置を上揃えにする */
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px; /* カラム間のギャップ */
 }
 
 /* Left Column: Controls */
 .controls {
-  flex: 0 0 180px; /* 固定幅 */
+  flex: 0 0 250px;
   padding-right: 20px;
   border-right: 1px solid #eee;
+  padding-bottom: 0;
 }
 
 .controls h2 {
@@ -44,7 +55,7 @@ h1 {
 }
 
 .controls h2:first-of-type {
-  margin-top: 0; /* 最初のh2の上マージンをなくす */
+  margin-top: 0;
 }
 
 .controls label {
@@ -57,7 +68,7 @@ h1 {
 .controls input[type="text"],
 .controls input[type="number"],
 .controls input[type="file"] {
-  width: calc(100% - 10px); /* Padding分を考慮 */
+  width: 100%;
   padding: 8px;
   margin-top: 5px;
   border: 1px solid #ddd;
@@ -74,25 +85,37 @@ h1 {
   font-size: 1em;
   margin-top: 10px;
   transition: background-color 0.2s;
+  width: 100%;
 }
 
 .controls button:hover {
-  background-color: #104cd0;
+  background-color: #0d3a90;
 }
 
 #selectedObjectControls label {
-  margin-bottom: 5px; /* 選択中コントロールのラベル間隔を狭める */
+  margin-bottom: 5px;
 }
 
 #selectedObjectControls input[type="number"],
 #selectedObjectControls input[type="text"] {
-  width: 100px; /* 個別調整 */
+  width: auto;
   margin-left: 5px;
+  display: inline-block;
+}
+
+#selectedObjectControls .input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+#selectedObjectControls .input-group label {
+  margin-bottom: 0;
 }
 
 #selectedObjectControls button {
   margin-right: 5px;
   background-color: #007bff;
+  width: auto;
 }
 
 #selectedObjectControls button:hover {
@@ -120,34 +143,27 @@ hr {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  margin: 0 20px; /* 左右にギャップを設定 */
-  /* Canvasのサイズを固定するため、このコンテナはCanvasのサイズに合わせる */
-  width: 900px; /* Canvasの幅に合わせる */
-  height: 600px; /* Canvasの高さに合わせる */
-  flex-shrink: 0; /* コンテナが縮まないように */
+  flex: 0 0 900px;
+  width: 900px;
+  height: 600px;
 }
 
 canvas {
-  border: 1px solid #ccc; /* Canvas自体のボーダー */
-  display: block; /* 不要な余白を削除 */
-  /* ここから下のwidth, height, min/max-width/heightを削除します */
-  /* width: 900px; */
-  /* height: 600px; */
-  /* min-width: 900px; */
-  /* min-height: 600px; */
-  /* max-width: 900px; */
-  /* max-height: 600px; */
+  border: 1px solid #ccc;
+  display: block;
 }
 
 /* Right Column: Object List */
 #object-list {
-  flex: 0 0 200px; /* 固定幅 */
+  flex: 0 0 200px;
   padding-left: 20px;
   border-left: 1px solid #eee;
+  padding-top: 0;
+  color: #333; /* ★追加: オブジェクトリスト全体の文字色を濃いグレーに */
 }
 
 #object-list h3 {
-  color: #555;
+  color: #555; /* 必要であれば #333 などに調整 */
   border-bottom: 1px solid #eee;
   padding-bottom: 10px;
   margin-top: 0;
@@ -161,21 +177,21 @@ canvas {
 }
 
 #object-ul li {
-  display: flex; /* Flexboxを有効に */
-  align-items: center; /* 垂直方向中央揃え */
-  justify-content: space-between; /* テキストとボタンを左右に配置 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 8px 10px;
   border: 1px solid #eee;
   margin-bottom: 5px;
   background-color: #f9f9f9;
-  cursor: grab; /* ドラッグ可能であることを示す */
+  cursor: grab;
   border-radius: 4px;
   font-size: 0.9em;
   position: relative;
   user-select: none;
-  /* レイアウト崩れ防止のための追加 */
-  overflow: hidden; /* はみ出たコンテンツを隠す */
-  box-sizing: border-box; /* paddingとborderをwidth/heightに含める */
+  overflow: hidden;
+  box-sizing: border-box;
+  color: #333; /* ★追加: リストアイテムの文字色を濃いグレーに */
 }
 
 #object-ul li.selected {
@@ -190,31 +206,21 @@ canvas {
   background-color: #e6f7ff;
 }
 
-/* テキスト部分のスタイルを修正・追加 */
 #object-ul li span {
-  /* flex-grow: 1; */ /* 最大限に占有する設定を解除 */
-  flex-shrink: 1; /* 必要に応じて縮小する */
-  flex-basis: auto; /* 基本サイズをコンテンツに合わせる */
-  /* min-width: 0; */ /* flex-basis: auto; と併用するとデフォルトで適用されるため不要 */
-  white-space: nowrap; /* テキストを折り返さない */
-  overflow: hidden; /* はみ出た部分を隠す */
-  text-overflow: ellipsis; /* はみ出た部分を三点リーダーで表示 */
-  padding-right: 5px; /* テキストとボタンの間に少し隙間を作る */
-
-  /* ***** ここを修正/追加 ***** */
-  /* 全角2文字分の幅の目安（font-size: 0.9em; を考慮） */
-  /* 例: 0.9em = 0.9 * 16px = 14.4px/文字 */
-  /* 全角2文字なので、14.4px * 2 = 28.8px くらいが目安 */
-  /* ただし、三点リーダー分も必要なので、もう少し大きくする */
-  max-width: 80px; /* 全角2文字＋αの幅を設定。環境によって微調整が必要な場合があります。 */
-  /* ************************* */
+  flex-shrink: 1;
+  flex-basis: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 5px;
+  max-width: 80px;
 }
 
 /* ボタンコンテナのスタイル */
 #object-ul li .item-buttons {
   display: flex;
-  gap: 5px; /* ボタン間のスペース */
-  flex-shrink: 0; /* コンテンツが縮まないように */
+  gap: 5px;
+  flex-shrink: 0;
 }
 
 #object-ul li .move-btn,
@@ -243,11 +249,11 @@ canvas {
 
 /* 矢印ボタンの見た目 */
 #object-ul li .move-up-btn::before {
-  content: "↑"; /* 上矢印 */
+  content: "↑";
 }
 
 #object-ul li .move-down-btn::before {
-  content: "↓"; /* 下矢印 */
+  content: "↓";
 }
 
 /* スライダーのスタイル */
@@ -287,90 +293,113 @@ canvas {
   border-radius: 50%;
 }
 
-/* ---ここから追加--- */
-
-/* レスポンシブデザインのブレークポイント (例: 768px 以下の場合に適用) */
-@media (max-width: 768px) {
-  /* Bodyのパディングを調整 (スマホで左右の余白を減らす) */
-  body {
-    padding: 10px;
-  }
-
-  /* トップコントロール（テキスト/画像追加部分）の調整 */
-  .top-controls {
-    flex-direction: column; /* 縦並びにする */
-    gap: 20px; /* 縦方向のギャップを調整 */
-    padding: 15px;
-    max-width: 100%; /* 全幅を使う */
-    box-sizing: border-box; /* パディングとボーダーを幅に含める */
-  }
-
-  .top-control-section {
-    min-width: unset; /* 最小幅の制約を解除 */
-    width: 100%; /* 親の幅いっぱいに広げる */
-  }
-
-  /* メインコンテナ（左右カラムとCanvas）の調整 */
+/* ---レスポンシブデザインのブレークポイント (max-width: 1024px でタブレットも考慮) --- */
+@media (max-width: 1024px) {
   .container {
-    flex-direction: column; /* 縦並びにする */
-    gap: 20px; /* 縦方向のギャップを設定 */
+    flex-direction: column; /* カラムを縦並びにする */
+    gap: 20px;
     padding: 15px;
-    max-width: 100%; /* 全幅を使う */
-    overflow-x: hidden; /* 横スクロールバーを非表示にする（縦並びになったため不要） */
-    box-sizing: border-box; /* パディングとボーダーを幅に含める */
+    max-width: 100%; /* 親の幅いっぱいに広げる */
+    flex-wrap: wrap; /* スマホサイズで折り返すように */
   }
 
-  /* 左カラム: Controls */
-  .controls {
-    border-right: none; /* 縦並びになったので右側のボーダーを削除 */
-    border-bottom: 1px solid #eee; /* 下にボーダーを追加 */
+  /* コントロールパネルの調整 */
+  .controls,
+  #object-list {
+    flex: 1 1 100%; /* 幅を親の100%に広げる */
+    max-width: 100%; /* 最大幅も100%に */
+    border: none; /* ボーダーを削除 */
     padding-right: 0;
+    padding-left: 0;
     padding-bottom: 20px;
-    flex: 0 0 auto; /* 固定幅を解除し、コンテンツに合わせて調整 */
-    width: 100%; /* 親の幅いっぱいに広げる */
-    min-width: unset; /* 最小幅の制約を解除 */
-    box-sizing: border-box; /* パディングとボーダーを幅に含める */
   }
 
-  /* 中央カラム: Canvas Container */
+  .controls {
+    border-bottom: 1px solid #eee; /* 下にボーダーを追加 */
+  }
+
+  #object-list {
+    padding-top: 20px;
+    border-top: 1px solid #eee; /* 上にボーダーを追加 */
+    color: #333; /* ★追加: レスポンシブ時も文字色を濃いグレーに */
+  }
+
+  /* Canvas Container の調整 */
   .canvas-container {
-    width: 100%;
-    /* height: auto;  高さの自動調整を解除 */
-    min-height: 250px; /* ★ここを修正/追加: スマホでの最小高さを設定 (例: 250px) */
-    max-height: 80vw; /* ★ここを修正/追加: 画面幅に対する最大高さを設定 (例: 画面幅の80%) */
+    width: 100%; /* 親の幅いっぱいに */
+    height: auto; /* 高さを自動調整 */
     margin: 0;
-    max-width: 100%;
-    /* max-height: 50vw;  これは以前の提案、より柔軟な設定に変更 */
-    min-width: unset;
-    box-sizing: border-box;
-    /* Canvasの縦横比を維持しながら、ある程度の高さを確保したい場合は
-       padding-bottomを使ったAspectRatio Boxの手法も有効ですが、
-       今回はmin-heightとmax-heightで対応します。 */
+    padding-bottom: 66.66%; /* Canvasの縦横比 600/900 = 0.6666... */
+    position: relative;
+    overflow: hidden;
+    flex: 1 1 auto; /* 伸縮・拡大を許可 */
   }
 
   /* Canvas要素自体も親コンテナに合わせてサイズ調整 */
   canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100% !important;
-    height: 100% !important; /* ★ここを修正: 親コンテナの高さに合わせる */
-    display: block;
-    object-fit: contain; /* ★ここを修正/追加: コンテナ内でCanvas内容を収める */
+    height: 100% !important;
   }
 
-  /* 右カラム: Object List */
-  #object-list {
-    border-left: none; /* 縦並びになったので左側のボーダーを削除 */
-    padding-left: 0;
-    padding-top: 20px;
-    flex: 0 0 auto; /* 固定幅を解除し、コンテンツに合わせて調整 */
-    width: 100%; /* 親の幅いっぱいに広げる */
-    min-width: unset; /* 最小幅の制約を解除 */
-    box-sizing: border-box; /* パディングとボーダーを幅に含める */
+  /* 入力フィールドやボタンの幅調整 */
+  .controls input[type="text"],
+  .controls input[type="number"],
+  .controls input[type="file"],
+  .controls button {
+    width: 100%;
+  }
+
+  #selectedObjectControls input[type="number"],
+  #selectedObjectControls input[type="text"] {
+    width: auto;
   }
 
   /* オブジェクトリストアイテムのテキスト幅調整 (より柔軟に) */
   #object-ul li span {
-    max-width: 60%; /* 親の幅に対して60%まで広がるように調整。必要に応じて変更 */
+    max-width: 100px; /* タブレット/中サイズのスマホで少し広げる */
   }
 }
 
-/* ---ここまで追加--- */
+/* ---さらに小さいスマホ向けのブレークポイント (例: 576px 以下) --- */
+@media (max-width: 576px) {
+  body {
+    padding: 5px;
+  }
+  .container {
+    padding: 10px;
+  }
+  .controls h2,
+  #object-list h3 {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+  }
+  .controls label {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+  }
+  .controls input,
+  .controls button {
+    padding: 6px;
+    font-size: 0.9em;
+  }
+  #object-ul li {
+    font-size: 0.8em;
+    padding: 6px 8px;
+    color: #333; /* ★追加: 小型スマホ時も文字色を濃いグレーに */
+  }
+  #object-ul li .item-buttons {
+    gap: 3px;
+  }
+  #object-ul li .move-btn,
+  #object-ul li .delete-item-btn {
+    padding: 3px 6px;
+    font-size: 0.7em;
+  }
+  #object-ul li span {
+    max-width: 80px; /* 小型スマホで調整。デフォルト値と同じか少し狭く */
+  }
+}
