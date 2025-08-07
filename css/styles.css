@@ -292,7 +292,18 @@ canvas {
   cursor: pointer;
   border-radius: 50%;
 }
+/* styles.css に追加 */
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
 
+.controls input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
 /* ---レスポンシブデザインのブレークポイント (max-width: 1024px でタブレットも考慮) --- */
 @media (max-width: 1024px) {
   .container {

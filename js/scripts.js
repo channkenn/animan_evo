@@ -33,6 +33,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const flipXBtn = document.getElementById("flipXBtn");
   const flipYBtn = document.getElementById("flipYBtn");
 
+  // ★追加: モード切り替え用のDOM要素を取得
+  const transparentModeCheckbox = document.getElementById(
+    "transparentModeCheckbox"
+  );
+  let isTransparentMode = false; // 透明モードの状態を保持する変数
+
   const defaultTextWidth = 400;
   const defaultTextX = 655;
   const defaultTextY = 515;
@@ -434,45 +440,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ★ここから修正★
   // ★修正箇所 1: resizeCanvas 関数
   function resizeCanvas() {
     const canvasContainer = document.querySelector(".canvas-container");
-
-    // 現在のウィンドウの幅を取得
     const windowWidth = window.innerWidth;
-
     let newWidth;
     let newHeight;
 
-    // 画面幅が1024px以下の場合 (スマホ/タブレット)
     if (windowWidth <= 1024) {
-      // Canvasの表示サイズを固定したい場合
-      // ここで固定したい幅と高さを指定します
-      // 例: PCと同じ初期サイズで固定 (もしはみ出してもスクロールで対応)
       newWidth = 900;
       newHeight = 600;
-
-      // もし、画面幅に合わせてCanvasの幅は伸縮させたいが、高さは固定したい場合
-      // newWidth = canvasContainer.offsetWidth; // 親要素の幅に合わせる
-      // newHeight = 600; // 高さは600pxで固定
-      // もしくは、さらに小さいスマホ向けに別の固定値を設定することも可能
-      // if (windowWidth <= 576) {
-      //   newHeight = 400; // 例: 576px以下なら高さを400pxに固定
-      // }
     } else {
-      // PC画面の場合 (1025px以上) は、現在のレスポンシブな動作を維持
       newWidth = canvasContainer.offsetWidth;
-      // 高さの計算を修正: 元のCanvasの縦横比を維持するようにする
-      // デスクトップのCanvas縦横比 (600 / 900) = 0.6666...
       newHeight = newWidth * (600 / 900);
     }
 
     canvas.setDimensions({ width: newWidth, height: newHeight });
 
-    // 背景画像の調整
     if (canvas.backgroundImage) {
-      // 背景画像を新しいCanvasサイズにフィットさせる
       canvas.backgroundImage.set({
         scaleX: newWidth / canvas.backgroundImage.width,
         scaleY: newHeight / canvas.backgroundImage.height,
@@ -484,14 +469,10 @@ document.addEventListener("DOMContentLoaded", () => {
       canvas.backgroundImage.setCoords();
     }
 
-    // evolutionImageの調整
     if (evolutionImage) {
-      // evolutionImageも新しいCanvasサイズにフィットさせる
-      // fitImageToCanvas関数を再利用
       fitImageToCanvas(evolutionImage);
       evolutionImage.setCoords();
     }
-
     canvas.renderAll();
   }
 
@@ -510,10 +491,9 @@ document.addEventListener("DOMContentLoaded", () => {
       left: 0,
       top: 0,
     });
-    // ★画像読み込み完了後にカウント
     loadedImagesCount++;
     if (loadedImagesCount === totalImagesToLoad) {
-      resizeCanvas(); // 全ての初期画像読み込み後に一度リサイズ
+      resizeCanvas();
     }
   });
 
@@ -528,17 +508,14 @@ document.addEventListener("DOMContentLoaded", () => {
     evolutionImage = img; // グローバル変数に格納
     canvas.add(img).bringToFront(); // Canvasに追加
 
-    // ★画像読み込み完了後にカウント
     loadedImagesCount++;
     if (loadedImagesCount === totalImagesToLoad) {
-      resizeCanvas(); // 全ての初期画像読み込み後に一度リサイズ
+      resizeCanvas();
     }
   });
 
-  // ウィンドウのリサイズイベントをリッスン
   window.addEventListener("resize", resizeCanvas);
 
-  // ここから下のイベントリスナーや関数はそのまま
   imageUpload.addEventListener("change", (event) => {
     uploadedFile = event.target.files[0] || null;
     if (uploadedFile) {
@@ -655,7 +632,9 @@ document.addEventListener("DOMContentLoaded", () => {
     canvas.renderAll();
   });
 
+  // ★修正箇所: saveBtn のイベントリスナー
   saveBtn.addEventListener("click", () => {
+    // 保存時にevolutionImageとbackgroundImageが非表示でも保存されるようにする
     const originalEvolutionVisible = evolutionImage
       ? evolutionImage.visible
       : false;
@@ -663,14 +642,22 @@ document.addEventListener("DOMContentLoaded", () => {
       ? canvas.backgroundImage.visible
       : false;
 
-    if (evolutionImage) evolutionImage.visible = true;
-    if (canvas.backgroundImage) canvas.backgroundImage.visible = true;
+    // 透明モードがONの場合は、両方の画像を非表示にする
+    if (isTransparentMode) {
+      if (evolutionImage) evolutionImage.visible = false;
+      if (canvas.backgroundImage) canvas.backgroundImage.visible = false;
+    } else {
+      // 通常モードの場合は、両方の画像を強制的に表示する
+      if (evolutionImage) evolutionImage.visible = true;
+      if (canvas.backgroundImage) canvas.backgroundImage.visible = true;
+    }
 
     const dataURL = canvas.toDataURL({
       format: "png",
       quality: 1,
     });
 
+    // 元の表示状態に戻す
     if (evolutionImage) evolutionImage.visible = originalEvolutionVisible;
     if (canvas.backgroundImage)
       canvas.backgroundImage.visible = originalBackgroundVisible;
@@ -687,16 +674,52 @@ document.addEventListener("DOMContentLoaded", () => {
     link.click();
   });
 
+  // ★修正箇所: clearBtn のイベントリスナー
   clearBtn.addEventListener("click", () => {
     const objects = canvas.getObjects();
 
+    // evolution.pngとback.png以外の、ユーザーが追加したオブジェクトを全て削除
     objects.forEach((obj) => {
-      if (obj === evolutionImage || obj === canvas.backgroundImage) return;
+      if (obj === evolutionImage || obj === canvas.backgroundImage) {
+        return;
+      }
       canvas.remove(obj);
     });
 
+    // 透明モードがONの場合、evolution.pngとback.pngを非表示にする
+    if (isTransparentMode) {
+      if (evolutionImage) {
+        evolutionImage.visible = false;
+      }
+      if (canvas.backgroundImage) {
+        canvas.backgroundImage.visible = false;
+      }
+    } else {
+      // 透明モードがOFFの場合は、常に表示状態にする
+      if (evolutionImage) {
+        evolutionImage.visible = true;
+      }
+      if (canvas.backgroundImage) {
+        canvas.backgroundImage.visible = true;
+      }
+    }
+
     imageUpload.value = "";
     uploadedFile = null;
+
+    canvas.renderAll();
+  });
+
+  // ★追加: transparentModeCheckbox のイベントリスナー
+  transparentModeCheckbox.addEventListener("change", (e) => {
+    isTransparentMode = e.target.checked;
+    if (evolutionImage) {
+      evolutionImage.visible = !isTransparentMode;
+    }
+    if (canvas.backgroundImage) {
+      canvas.backgroundImage.visible = !isTransparentMode;
+    }
+    canvas.renderAll();
   });
 
   // 初期ロード時のリストとプロパティの更新
